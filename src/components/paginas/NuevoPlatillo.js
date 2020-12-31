@@ -1,12 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useFormik } from  'formik';
 import * as Yup from 'yup';
 import { FirebaseContext } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
-import FileUploader from 'react-firebase-file-uploader';
+import FileUploader from "react-firebase-file-uploader";
 
 
 const NuevoPlatillo = () => {
+
+    //State para las imagenes
+    const [subiendo, setSubiendo] = useState(false);
+    const [progreso, setProgreso] = useState(0);
+    const [urlImagen, setUrlImagen] = useState('');
 
     //Context con las operaciones de firebase
     const { firebase } = useContext(FirebaseContext);
@@ -42,14 +47,90 @@ const NuevoPlatillo = () => {
                 // console.log(platillo);
                 platillo.existencia = true;
                 firebase.db.collection('productos').add(platillo);
+                setTimeout(function() {
+                    handleUpload();
+                }, 300);
 
                 //Redireccionar
-                navigate('/menu')
+                // navigate('/menu')
             } catch (error) {
                 console.log(error);
             }
         }
     });
+
+    const [image, setImage] = useState({});
+
+    const handleChange = e => {
+        if (e.target.files[0]) {
+          setImage(e.target.files[0]);
+          console.log('target: ',e.target.files[0]);
+        }
+      };
+
+      const handleUpload = () => {
+        const uploadTask = firebase.storage.ref(`productos/${image.name}`).put(image);
+        uploadTask.on(
+            "state_changed",
+            snapshot => {
+            const progress = Math.round(
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            );
+            setProgreso(progress);
+            console.log('progress: ', progress);
+            },
+            error => {
+            console.log(error);
+            },
+            () => {
+            firebase.storage
+                .ref("images")
+                .child(image.name)
+                .getDownloadURL()
+                .then(url => {
+                setUrlImagen(url);
+                console.log('url:', url);
+                });
+
+                console.log('urlImagen: ', urlImagen);
+            }
+        );
+      };
+
+    //Todo sobre las imagenes
+    const handleUploadStart = () => {
+        setProgreso(0);
+        setSubiendo(true);
+    }
+    const handleUploadError = error => {
+        setSubiendo(false); 
+        console.log(error);
+    }
+
+    const handleUploadSuccess = nombre => {
+        setProgreso(100);
+        setSubiendo(false);
+
+        //Almacenar la URL del destino
+        const url = firebase
+                    .storage
+                    .ref('productos')
+                    .child(nombre)
+                    .getDownloadURL()
+                    .then(url => setUrlImagen(url));
+
+        console.log('url: ', url);
+        setUrlImagen(url);
+
+    }
+
+    const handleProgress = progreso => {
+        setProgreso(progreso);
+        console.log('progreso: ', progreso);
+    }
+
+
+
 
     return ( 
         <>
@@ -131,13 +212,21 @@ const NuevoPlatillo = () => {
 
                         <div className="mb-4">
                             <label htmlFor="imagen" className="block text-gray-700 text-sm font-bold mb-2">Imagen</label>
-                            <FileUploader
+                            <input type="file" 
+                                name="imagen" 
+                                onChange={handleChange} />
+
+                            {/* <FileUploader
                                 accept="imag/*"
                                 id="imagen"
                                 name="imagen"
                                 randomizeFilename
                                 storageRef={firebase.storage.ref('productos')}
-                            />
+                                onUploadStart={handleUploadStart}
+                                onUploadError={handleUploadError}
+                                onUploadSuccess={handleUploadSuccess}
+                                onProgress={handleProgress}
+                            /> */}
                         </div>
 
                         <div className="mb-4">
