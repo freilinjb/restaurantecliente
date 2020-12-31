@@ -11,8 +11,8 @@ const Sidebar = () => {
                 <p className="mt-3 text-gray-600">Administra tu restaurante en las siguientes opciones:</p>
                 <nav className="mt-10">
                     {/* <Link to="/">Ordenes</Link> */}
-                    <NavLink className="p-1 text-gray-400 block hover:bg-yellow-500 hover:text-gray-900" activeClassName="text-yellow-500" exact to="/">Ordenes</NavLink>
-                    <NavLink className="p-1 text-gray-400 block hover:bg-yellow-500 hover:text-gray-900" activeClassName="text-yellow-500" exact to="/Menu">Menú</NavLink>
+                    <NavLink className="p-1 text-gray-400 block hover:bg-yellow-500 hover:text-gray-900" activeClassName="text-yellow-500" exact="true" to="/">Ordenes</NavLink>
+                    <NavLink className="p-1 text-gray-400 block hover:bg-yellow-500 hover:text-gray-900" activeClassName="text-yellow-500" exact="true" to="/Menu">Menú</NavLink>
                 </nav>
             </div>
         </div>

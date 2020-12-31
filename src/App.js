@@ -12,7 +12,7 @@ function App() {
     {/* min-h-screen toma todo el ancho de la pantalla*/}
       <Sidebar />
 
-      <div className="md:w-4/5 xl:w-4/5">
+      <div className="md:w-4/5 xl:w-4/5 p-6">
         <Routes>
           <Route path="/" element={<Ordenes />} />
           <Route path="/Menu" element={<Menu />} />
