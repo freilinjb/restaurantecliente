@@ -1,4 +1,6 @@
 import app from 'firebase/app';
+import 'firebase/firestore';
+
 import firebaseConfig from  './config';
 
 class Firebase {
@@ -6,6 +8,8 @@ class Firebase {
         if(!app.apps.length) {
             app.initializeApp(firebaseConfig);
         }
+        //Objeto con todas las operaciones para db
+        this.db = app.firestore();
     }
 }
 
