@@ -3,21 +3,34 @@ import  { Link } from 'react-router-dom';
 import { FirebaseContext } from '../../firebase';
 
 const Menu = () => {
+    //definir el state para los platillos
+    const [platillos, setPlatillos] = useState([]);
+
     const { firebase } = useContext(FirebaseContext);
 
+    //Consultar la db de datos al cargar
     useEffect(() => {
-        const obtenerPlatillos = async () => {
-            const resultado = await firebase.db.collection('productos').get();
-            console.log('resultado: ', resultado);
-
-            resultado.forEach(platillo => {
-                console.log(platillo.data());
-            });
+        const obtenerPlatillos = () => {
+            firebase.db.collection('productos').onSnapshot(manejarSnapshop);
+            // onSnapshot es para realtime .get() para consultar los datos fijos
 
         }
 
         obtenerPlatillos();
     },[]);
+
+    //Snapshop nos permite utilizar la db de datos en tiempo real de firestone
+    function manejarSnapshop(snapshot) {
+        const platillos = snapshot.docs.map(doc => {
+            return {
+                id: doc.id,
+                ...doc.data()
+            }
+        });
+
+        setPlatillos(platillos);
+        // console.log(platillos);
+    }
 
     return ( 
         <>
