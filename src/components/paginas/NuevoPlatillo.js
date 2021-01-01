@@ -22,11 +22,11 @@ const NuevoPlatillo = () => {
     //validacion y leer los datos del formulario
     const formik = useFormik({ 
         initialValues: {
-            nombre: '',
-            precio: '',
-            categoria: '',
+            nombre: 'comida',
+            precio: '12',
+            categoria: 'comida',
             imagen: '',
-            descripcion: '',
+            descripcion: 'comida comida comida',
         },
         validationSchema: Yup.object({
             nombre: Yup.string()
@@ -44,12 +44,20 @@ const NuevoPlatillo = () => {
         }), 
         onSubmit: platillo => {
             try {
-                // console.log(platillo);
-                platillo.existencia = true;
-                firebase.db.collection('productos').add(platillo);
                 setTimeout(function() {
-                    handleUpload();
+                    handleUpload(platillo);
+                    
+                    // if(subiendo == false) {
+                    //     platillo.imagen = "hola mundo";
+
+                    //     console.log(platillo);
+                    //     platillo.existencia = true;
+                    //     firebase.db.collection('productos').add(platillo);
+                    // }
                 }, 300);
+
+               
+                
 
                 //Redireccionar
                 // navigate('/menu')
@@ -68,7 +76,8 @@ const NuevoPlatillo = () => {
         }
       };
 
-      const handleUpload = () => {
+      const handleUpload = (platillo) => {
+        setSubiendo(true);
         const uploadTask = firebase.storage.ref(`productos/${image.name}`).put(image);
         uploadTask.on(
             "state_changed",
@@ -84,53 +93,25 @@ const NuevoPlatillo = () => {
             },
             () => {
             firebase.storage
-                .ref("images")
+                .ref("productos")
                 .child(image.name)
                 .getDownloadURL()
                 .then(url => {
                 setUrlImagen(url);
                 console.log('url:', url);
-                });
+                platillo.imagen = url;
 
-                console.log('urlImagen: ', urlImagen);
+                setTimeout(()=> {
+                    console.log(platillo);
+                    platillo.existencia = true;
+                    firebase.db.collection('productos').add(platillo);
+                    console.log('urlImagen: ', urlImagen);
+                    setSubiendo(false);
+                }, 300);
+                });
             }
         );
       };
-
-    //Todo sobre las imagenes
-    const handleUploadStart = () => {
-        setProgreso(0);
-        setSubiendo(true);
-    }
-    const handleUploadError = error => {
-        setSubiendo(false); 
-        console.log(error);
-    }
-
-    const handleUploadSuccess = nombre => {
-        setProgreso(100);
-        setSubiendo(false);
-
-        //Almacenar la URL del destino
-        const url = firebase
-                    .storage
-                    .ref('productos')
-                    .child(nombre)
-                    .getDownloadURL()
-                    .then(url => setUrlImagen(url));
-
-        console.log('url: ', url);
-        setUrlImagen(url);
-
-    }
-
-    const handleProgress = progreso => {
-        setProgreso(progreso);
-        console.log('progreso: ', progreso);
-    }
-
-
-
 
     return ( 
         <>
@@ -228,6 +209,18 @@ const NuevoPlatillo = () => {
                                 onProgress={handleProgress}
                             /> */}
                         </div>
+
+                        { subiendo && (
+                            <div className="h-12 relative w-full border">
+                                <div className="bg-green-500 absolute left-0 top-0 text-white px-2 text-sm h-12 flex items-center" style={{width: `${progreso}%`}}>
+                                    {progreso} %
+                                </div>
+                            </div>   
+                        )}
+
+                        {urlImagen && (
+                            <p className="bg-green-500 text-white p-3 text-center my-5">La imagen se subió correctamente</p>
+                        )}
 
                         <div className="mb-4">
                             <label htmlFor="descripcion" className="block text-gray-700 text-sm font-bold mb-2">Descripcion</label>
